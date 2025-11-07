@@ -2,95 +2,132 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* SHORA-BOT Design System - Santé & Sécurité au travail */
 
 @layer base {
   :root {
+    /* Shora Brand Colors - Health & Safety Theme */
+    --shora-primary: 160 84% 39%;      /* Teal green - main brand */
+    --shora-primary-light: 160 77% 52%; 
+    --shora-primary-dark: 160 84% 29%;
+    
+    --shora-success: 142 71% 45%;       /* Green - health, success */
+    --shora-success-light: 142 76% 65%;
+    
+    --shora-danger: 0 84% 60%;          /* Red - emergencies */
+    --shora-danger-light: 0 100% 75%;
+    
+    --shora-warning: 38 92% 50%;        /* Orange - alerts */
+    --shora-warning-light: 38 100% 65%;
+    
+    --shora-info: 199 89% 48%;          /* Blue - information */
+    --shora-info-light: 199 89% 65%;
+    
+    --shora-neutral-50: 210 20% 98%;
+    --shora-neutral-100: 210 20% 95%;
+    --shora-neutral-200: 210 16% 90%;
+    --shora-neutral-300: 210 14% 83%;
+    --shora-neutral-400: 210 12% 65%;
+    --shora-neutral-500: 210 10% 50%;
+    --shora-neutral-600: 210 12% 40%;
+    --shora-neutral-700: 210 15% 28%;
+    --shora-neutral-800: 210 18% 16%;
+    --shora-neutral-900: 210 20% 8%;
+
+    /* Base semantic tokens */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 210 20% 8%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 210 20% 8%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 210 20% 8%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: var(--shora-primary);
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: var(--shora-neutral-100);
+    --secondary-foreground: var(--shora-neutral-900);
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: var(--shora-neutral-100);
+    --muted-foreground: var(--shora-neutral-600);
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: var(--shora-info);
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: var(--shora-danger);
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --success: var(--shora-success);
+    --success-foreground: 0 0% 100%;
+
+    --warning: var(--shora-warning);
+    --warning-foreground: 0 0% 100%;
+
+    --border: var(--shora-neutral-200);
+    --input: var(--shora-neutral-200);
+    --ring: var(--shora-primary);
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Sidebar tokens */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: var(--shora-neutral-800);
+    --sidebar-primary: var(--shora-primary);
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: var(--shora-neutral-50);
+    --sidebar-accent-foreground: var(--shora-neutral-900);
+    --sidebar-border: var(--shora-neutral-200);
+    --sidebar-ring: var(--shora-primary);
 
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: var(--shora-neutral-900);
+    --foreground: var(--shora-neutral-50);
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: var(--shora-neutral-800);
+    --card-foreground: var(--shora-neutral-50);
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: var(--shora-neutral-800);
+    --popover-foreground: var(--shora-neutral-50);
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: var(--shora-primary-light);
+    --primary-foreground: var(--shora-neutral-900);
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: var(--shora-neutral-700);
+    --secondary-foreground: var(--shora-neutral-50);
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: var(--shora-neutral-700);
+    --muted-foreground: var(--shora-neutral-400);
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: var(--shora-info-light);
+    --accent-foreground: var(--shora-neutral-900);
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: var(--shora-danger-light);
+    --destructive-foreground: var(--shora-neutral-900);
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --success: var(--shora-success-light);
+    --success-foreground: var(--shora-neutral-900);
+
+    --warning: var(--shora-warning-light);
+    --warning-foreground: var(--shora-neutral-900);
+
+    --border: var(--shora-neutral-700);
+    --input: var(--shora-neutral-700);
+    --ring: var(--shora-primary-light);
+
+    --sidebar-background: var(--shora-neutral-900);
+    --sidebar-foreground: var(--shora-neutral-100);
+    --sidebar-primary: var(--shora-primary-light);
+    --sidebar-primary-foreground: var(--shora-neutral-900);
+    --sidebar-accent: var(--shora-neutral-800);
+    --sidebar-accent-foreground: var(--shora-neutral-100);
+    --sidebar-border: var(--shora-neutral-700);
+    --sidebar-ring: var(--shora-primary-light);
   }
 }
 

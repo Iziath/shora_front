@@ -22,6 +22,8 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          light: "hsl(var(--shora-primary-light))",
+          dark: "hsl(var(--shora-primary-dark))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -30,6 +32,26 @@ export default {
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+          light: "hsl(var(--shora-success-light))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+          light: "hsl(var(--shora-warning-light))",
+        },
+        danger: {
+          DEFAULT: "hsl(var(--shora-danger))",
+          foreground: "hsl(var(--destructive-foreground))",
+          light: "hsl(var(--shora-danger-light))",
+        },
+        info: {
+          DEFAULT: "hsl(var(--shora-info))",
+          foreground: "hsl(var(--accent-foreground))",
+          light: "hsl(var(--shora-info-light))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
