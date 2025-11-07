@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { User } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
+import { verifyToken, removeAuthToken, User } from "@/lib/api";
 
 interface AuthContextType {
   user: User | null;
@@ -28,26 +27,47 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const checkAuth = async () => {
+    try {
+      const response = await verifyToken();
+      if (response.success && response.data) {
+        setUser(response.data);
+      } else {
+        removeAuthToken();
+        setUser(null);
+      }
+    } catch (error) {
+      removeAuthToken();
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    // Check active session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    // Vérifier si un token existe et le valider
+    checkAuth();
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    // Écouter les événements de stockage pour détecter les changements de token
+    const handleStorageChange = () => {
+      checkAuth();
+    };
 
-    return () => subscription.unsubscribe();
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  // Exposer la fonction pour mettre à jour l'utilisateur après connexion
+  useEffect(() => {
+    (window as any).__updateAuthUser = (userData: User) => {
+      setUser(userData);
+      setLoading(false);
+    };
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await removeAuthToken();
+    setUser(null);
     navigate("/auth");
   };
 

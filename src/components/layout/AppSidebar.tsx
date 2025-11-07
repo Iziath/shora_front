@@ -1,6 +1,7 @@
 import { Home, AlertCircle, Users, Radio, QrCode, Settings } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
+import logo from "../../../assets/image/logo_shora.png";
 import {
   Sidebar,
   SidebarContent,
@@ -15,7 +16,7 @@ import {
 } from "@/components/ui/sidebar";
 
 const menuItems = [
-  { title: "Dashboard", url: "/", icon: Home },
+  { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "Incidents", url: "/incidents", icon: AlertCircle },
   { title: "Utilisateurs", url: "/users", icon: Users },
   { title: "Diffusion", url: "/broadcast", icon: Radio },
@@ -29,7 +30,7 @@ export function AppSidebar() {
   const currentPath = location.pathname;
 
   const isActive = (path: string) => {
-    if (path === "/") return currentPath === "/";
+    if (path === "/dashboard") return currentPath === "/dashboard";
     return currentPath.startsWith(path);
   };
 
@@ -37,15 +38,11 @@ export function AppSidebar() {
     <Sidebar className={open ? "w-64" : "w-16"} collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border p-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
-            S
-          </div>
-          {open && (
-            <div>
-              <h2 className="font-bold text-lg text-foreground">Shora-Bot</h2>
-              <p className="text-xs text-muted-foreground">Admin Dashboard</p>
-            </div>
-          )}
+          <img
+            src={logo}
+            alt="SHORA Logo"
+            className={open ? "h-10 w-auto" : "h-8 w-auto"}
+          />
         </div>
       </SidebarHeader>
 

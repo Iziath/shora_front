@@ -6,55 +6,70 @@
 
 @layer base {
   :root {
-    /* Shora Brand Colors - Health & Safety Theme */
-    --shora-primary: 160 84% 39%;      /* Teal green - main brand */
-    --shora-primary-light: 160 77% 52%; 
-    --shora-primary-dark: 160 84% 29%;
+    /* SHORA-BOT Charte Graphique - Santé & Sécurité au travail */
     
+    /* Bleu Pétrole profond - Identité / Fond #0F3D4C */
+    --shora-primary: 195 66% 19%;       /* #0F3D4C - Principal */
+    --shora-primary-light: 195 50% 30%; 
+    --shora-primary-dark: 195 70% 12%;
+    
+    /* Orange Sécurité - Accent/ Boutons #F68B1F */
+    --shora-warning: 30 92% 54%;        /* #F68B1F - Orange sécurité */
+    --shora-warning-light: 30 100% 65%;
+    
+    /* Sable clair - Fonds doux #F5E9D6 */
+    --shora-sand: 38 58% 91%;           /* #F5E9D6 - Sable clair */
+    --shora-sand-light: 38 60% 95%;
+    --shora-sand-dark: 38 50% 85%;
+    
+    /* Gris acier - Éléments neutres #C2C9Cc */
+    --shora-steel: 200 6% 78%;          /* #C2C9Cc - Gris acier */
+    --shora-steel-light: 200 8% 85%;
+    --shora-steel-dark: 200 5% 65%;
+    
+    /* Couleurs sémantiques */
     --shora-success: 142 71% 45%;       /* Green - health, success */
     --shora-success-light: 142 76% 65%;
     
     --shora-danger: 0 84% 60%;          /* Red - emergencies */
     --shora-danger-light: 0 100% 75%;
     
-    --shora-warning: 38 92% 50%;        /* Orange - alerts */
-    --shora-warning-light: 38 100% 65%;
-    
     --shora-info: 199 89% 48%;          /* Blue - information */
     --shora-info-light: 199 89% 65%;
     
-    --shora-neutral-50: 210 20% 98%;
-    --shora-neutral-100: 210 20% 95%;
-    --shora-neutral-200: 210 16% 90%;
-    --shora-neutral-300: 210 14% 83%;
-    --shora-neutral-400: 210 12% 65%;
-    --shora-neutral-500: 210 10% 50%;
-    --shora-neutral-600: 210 12% 40%;
-    --shora-neutral-700: 210 15% 28%;
-    --shora-neutral-800: 210 18% 16%;
-    --shora-neutral-900: 210 20% 8%;
+    /* Neutres basés sur le gris acier */
+    --shora-neutral-50: 200 10% 98%;
+    --shora-neutral-100: 200 8% 95%;
+    --shora-neutral-200: var(--shora-steel-light);
+    --shora-neutral-300: var(--shora-steel);
+    --shora-neutral-400: var(--shora-steel-dark);
+    --shora-neutral-500: 200 5% 50%;
+    --shora-neutral-600: 200 6% 40%;
+    --shora-neutral-700: 200 8% 28%;
+    --shora-neutral-800: 195 15% 16%;
+    --shora-neutral-900: 195 20% 8%;
 
-    /* Base semantic tokens */
-    --background: 0 0% 100%;
-    --foreground: 210 20% 8%;
+    /* Base semantic tokens - Charte Graphique */
+    --background: var(--shora-sand);        /* Sable clair pour fonds doux */
+    --foreground: var(--shora-primary-dark); /* Bleu pétrole pour texte */
 
-    --card: 0 0% 100%;
-    --card-foreground: 210 20% 8%;
+    --card: 0 0% 100%;                      /* Blanc pour cartes */
+    --card-foreground: var(--shora-primary-dark);
 
     --popover: 0 0% 100%;
-    --popover-foreground: 210 20% 8%;
+    --popover-foreground: var(--shora-primary-dark);
 
-    --primary: var(--shora-primary);
-    --primary-foreground: 0 0% 100%;
+    --primary: var(--shora-primary);       /* Bleu pétrole profond */
+    --primary-foreground: 0 0% 100%;       /* Blanc sur bleu */
 
-    --secondary: var(--shora-neutral-100);
-    --secondary-foreground: var(--shora-neutral-900);
+    --secondary: var(--shora-sand-dark);   /* Sable foncé */
+    --secondary-foreground: var(--shora-primary-dark);
 
-    --muted: var(--shora-neutral-100);
+    --muted: var(--shora-steel-light);     /* Gris acier clair */
     --muted-foreground: var(--shora-neutral-600);
 
-    --accent: var(--shora-info);
-    --accent-foreground: 0 0% 100%;
+    --accent: var(--shora-warning);        /* Orange sécurité */
+    --accent-foreground: 0 0% 100%;       /* Blanc sur orange */
 
     --destructive: var(--shora-danger);
     --destructive-foreground: 0 0% 100%;
@@ -62,72 +77,73 @@
     --success: var(--shora-success);
     --success-foreground: 0 0% 100%;
 
-    --warning: var(--shora-warning);
+    --warning: var(--shora-warning);       /* Orange sécurité */
     --warning-foreground: 0 0% 100%;
 
-    --border: var(--shora-neutral-200);
-    --input: var(--shora-neutral-200);
-    --ring: var(--shora-primary);
+    --border: var(--shora-steel);          /* Gris acier pour bordures */
+    --input: var(--shora-steel-light);     /* Gris acier clair pour inputs */
+    --ring: var(--shora-warning);          /* Orange pour focus */
 
     --radius: 0.5rem;
 
-    /* Sidebar tokens */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: var(--shora-neutral-800);
-    --sidebar-primary: var(--shora-primary);
+    /* Sidebar tokens - Charte Graphique */
+    --sidebar-background: var(--shora-primary); /* Bleu pétrole pour sidebar */
+    --sidebar-foreground: 0 0% 100%;           /* Blanc sur bleu */
+    --sidebar-primary: var(--shora-warning);    /* Orange pour éléments actifs */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: var(--shora-neutral-50);
-    --sidebar-accent-foreground: var(--shora-neutral-900);
-    --sidebar-border: var(--shora-neutral-200);
-    --sidebar-ring: var(--shora-primary);
+    --sidebar-accent: var(--shora-primary-light); /* Bleu pétrole clair */
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: var(--shora-primary-dark);
+    --sidebar-ring: var(--shora-warning);
 
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
-    --background: var(--shora-neutral-900);
-    --foreground: var(--shora-neutral-50);
+    /* Mode sombre avec la charte graphique */
+    --background: var(--shora-primary-dark);
+    --foreground: var(--shora-sand);
 
-    --card: var(--shora-neutral-800);
-    --card-foreground: var(--shora-neutral-50);
+    --card: var(--shora-primary);
+    --card-foreground: var(--shora-sand);
 
-    --popover: var(--shora-neutral-800);
-    --popover-foreground: var(--shora-neutral-50);
+    --popover: var(--shora-primary);
+    --popover-foreground: var(--shora-sand);
 
-    --primary: var(--shora-primary-light);
-    --primary-foreground: var(--shora-neutral-900);
+    --primary: var(--shora-warning);
+    --primary-foreground: var(--shora-primary-dark);
 
-    --secondary: var(--shora-neutral-700);
-    --secondary-foreground: var(--shora-neutral-50);
+    --secondary: var(--shora-primary-light);
+    --secondary-foreground: var(--shora-sand);
 
-    --muted: var(--shora-neutral-700);
-    --muted-foreground: var(--shora-neutral-400);
+    --muted: var(--shora-steel-dark);
+    --muted-foreground: var(--shora-steel-light);
 
-    --accent: var(--shora-info-light);
-    --accent-foreground: var(--shora-neutral-900);
+    --accent: var(--shora-warning);
+    --accent-foreground: var(--shora-primary-dark);
 
     --destructive: var(--shora-danger-light);
-    --destructive-foreground: var(--shora-neutral-900);
+    --destructive-foreground: var(--shora-primary-dark);
 
     --success: var(--shora-success-light);
-    --success-foreground: var(--shora-neutral-900);
+    --success-foreground: var(--shora-primary-dark);
 
-    --warning: var(--shora-warning-light);
-    --warning-foreground: var(--shora-neutral-900);
+    --warning: var(--shora-warning);
+    --warning-foreground: var(--shora-primary-dark);
 
-    --border: var(--shora-neutral-700);
-    --input: var(--shora-neutral-700);
-    --ring: var(--shora-primary-light);
+    --border: var(--shora-steel-dark);
+    --input: var(--shora-steel);
+    --ring: var(--shora-warning);
 
-    --sidebar-background: var(--shora-neutral-900);
-    --sidebar-foreground: var(--shora-neutral-100);
-    --sidebar-primary: var(--shora-primary-light);
-    --sidebar-primary-foreground: var(--shora-neutral-900);
-    --sidebar-accent: var(--shora-neutral-800);
-    --sidebar-accent-foreground: var(--shora-neutral-100);
-    --sidebar-border: var(--shora-neutral-700);
-    --sidebar-ring: var(--shora-primary-light);
+    --sidebar-background: var(--shora-primary);
+    --sidebar-foreground: var(--shora-sand);
+    --sidebar-primary: var(--shora-warning);
+    --sidebar-primary-foreground: var(--shora-primary-dark);
+    --sidebar-accent: var(--shora-primary-light);
+    --sidebar-accent-foreground: var(--shora-sand);
+    --sidebar-border: var(--shora-steel-dark);
+    --sidebar-ring: var(--shora-warning);
   }
 }
 

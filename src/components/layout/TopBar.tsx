@@ -1,6 +1,7 @@
 import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import logo from "../../../assets/image/logo_shora.png";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,9 +20,12 @@ export const TopBar = () => {
     <header className="h-16 border-b border-border bg-card flex items-center justify-between px-4 md:px-6">
       <div className="flex items-center gap-4">
         <SidebarTrigger />
-        <div className="hidden md:block">
-          <h1 className="text-xl font-semibold text-foreground">Shora-Bot Admin</h1>
-          <p className="text-sm text-muted-foreground">Gestion santé & sécurité</p>
+        <div className="hidden md:flex items-center gap-3">
+          <img
+            src={logo}
+            alt="SHORA Logo"
+            className="h-10 w-auto"
+          />
         </div>
       </div>
 

@@ -11,7 +11,9 @@ import Incidents from "./pages/Incidents";
 import Users from "./pages/Users";
 import Broadcast from "./pages/Broadcast";
 import QRCodePage from "./pages/QRCode";
+import ChatbotPublic from "./pages/ChatbotPublic";
 import Auth from "./pages/Auth";
+import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,12 +23,18 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
         <AuthProvider>
           <Routes>
+            <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
             <Route
-              path="/"
+              path="/dashboard"
               element={
                 <ProtectedRoute>
                   <AppLayout><Dashboard /></AppLayout>
@@ -65,6 +73,8 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            {/* Route publique pour le chatbot (accessible sans authentification) */}
+            <Route path="/chatbot" element={<ChatbotPublic />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

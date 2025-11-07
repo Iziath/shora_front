@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { apiRequest } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
 export interface Notification {
@@ -17,45 +17,56 @@ export const useNotifications = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Fetch notifications
+  // Fetch notifications (basées sur les incidents récents)
   const fetchNotifications = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      // Récupérer les incidents récents non résolus comme notifications
+      const response = await apiRequest<{
+        data: any[];
+        pagination?: any;
+      }>("/api/admin/incidents?limit=20&status=open,in-progress");
       
-      if (!user) {
+      // Ne pas traiter si le backend n'est pas disponible (erreur silencieuse)
+      if (!response.success && response.error?.includes('Backend non disponible')) {
+        return; // Sortir silencieusement
+      }
+      
+      if (response.success && response.data) {
+        // La réponse peut être un tableau directement ou un objet avec data
+        const incidents = Array.isArray(response.data) 
+          ? response.data 
+          : (response.data.data || []);
+        
+        // Transformer les incidents en notifications
+        const incidentNotifications: Notification[] = incidents.map((incident: any) => ({
+          id: incident._id,
+          title: `Nouvel incident: ${incident.type || 'Incident'}`,
+          message: incident.description || 'Aucune description',
+          is_read: false, // Pour l'instant, on considère tous comme non lus
+          created_at: incident.reportedAt || new Date().toISOString(),
+          incident_id: incident._id,
+        }));
+
+        setNotifications(incidentNotifications);
+        setUnreadCount(incidentNotifications.length);
+      } else {
         setNotifications([]);
         setUnreadCount(0);
-        setLoading(false);
-        return;
       }
-
-      const { data, error } = await supabase
-        .from("notifications")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(50);
-
-      if (error) throw error;
-
-      setNotifications(data || []);
-      setUnreadCount((data || []).filter(n => !n.is_read).length);
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
+    } catch (error: any) {
+      // Ne pas logger les erreurs de connexion (backend non démarré)
+      // apiRequest gère déjà ces erreurs silencieusement
+      setNotifications([]);
+      setUnreadCount(0);
     } finally {
       setLoading(false);
     }
   };
 
-  // Mark notification as read
+  // Mark notification as read (pour l'instant, on ne fait rien côté backend)
   const markAsRead = async (notificationId: string) => {
     try {
-      const { error } = await supabase
-        .from("notifications")
-        .update({ is_read: true })
-        .eq("id", notificationId);
-
-      if (error) throw error;
-
+      // Mettre à jour localement
       setNotifications(prev =>
         prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
       );
@@ -68,13 +79,6 @@ export const useNotifications = () => {
   // Mark all as read
   const markAllAsRead = async () => {
     try {
-      const { error } = await supabase
-        .from("notifications")
-        .update({ is_read: true })
-        .eq("is_read", false);
-
-      if (error) throw error;
-
       setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
       setUnreadCount(0);
     } catch (error) {
@@ -82,39 +86,17 @@ export const useNotifications = () => {
     }
   };
 
-  // Subscribe to real-time notifications
+  // Fetch notifications on mount and set up polling
   useEffect(() => {
     fetchNotifications();
 
-    const channel = supabase
-      .channel("notifications-changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "notifications",
-        },
-        (payload) => {
-          const newNotification = payload.new as Notification;
-          
-          setNotifications(prev => [newNotification, ...prev]);
-          setUnreadCount(prev => prev + 1);
+    // Polling toutes les 30 secondes pour les nouvelles notifications
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 30000);
 
-          // Show toast notification
-          toast({
-            title: newNotification.title,
-            description: newNotification.message,
-            variant: "default",
-          });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [toast]);
+    return () => clearInterval(interval);
+  }, []);
 
   return {
     notifications,

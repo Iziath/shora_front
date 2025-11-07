@@ -7,7 +7,12 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: {
+        DEFAULT: "1.5rem",
+        sm: "1.75rem",
+        lg: "3rem",
+        xl: "4rem",
+      },
       screens: {
         "2xl": "1400px",
       },
@@ -79,6 +84,11 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        petrol: "#0F3D4C",
+        safety: "#F68B1F",
+        sand: "#F5E9D6",
+        steel: "#C2C9CC",
+        snow: "#FFFFFF",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -106,6 +116,13 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+      },
+      fontFamily: {
+        sans: ["Manrope", "ui-sans-serif", "system-ui"],
+        display: ["Sora", "ui-sans-serif", "system-ui"],
+      },
+      boxShadow: {
+        glow: "0 24px 60px -20px rgba(15, 61, 76, 0.65)",
       },
     },
   },
