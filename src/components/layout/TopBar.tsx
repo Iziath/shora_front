@@ -1,4 +1,4 @@
-import { Bell, User } from "lucide-react";
+import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -9,8 +9,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { NotificationsDropdown } from "./NotificationsDropdown";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 export const TopBar = () => {
+  const { signOut } = useAuth();
+
   return (
     <header className="h-16 border-b border-border bg-card flex items-center justify-between px-4 md:px-6">
       <div className="flex items-center gap-4">
@@ -22,10 +26,7 @@ export const TopBar = () => {
       </div>
 
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full" />
-        </Button>
+        <NotificationsDropdown />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -39,7 +40,7 @@ export const TopBar = () => {
             <DropdownMenuItem>Profil</DropdownMenuItem>
             <DropdownMenuItem>Paramètres</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem className="text-destructive" onClick={signOut}>
               Déconnexion
             </DropdownMenuItem>
           </DropdownMenuContent>
