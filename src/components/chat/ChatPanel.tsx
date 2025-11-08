@@ -8,21 +8,25 @@ interface ChatMessage {
     id: string;
     text_user?: string;
     text_bot?: string;
-    type?: 'text' | 'button' | 'quiz' | 'incident';
+    type?: 'text' | 'button' | 'quiz' | 'incident' | 'reminder';
     buttons?: Array<{ label: string; value: string; emoji?: string }>;
     isLoading?: boolean;
     timestamp?: Date;
+    imageUrl?: string; // Pour les rappels avec images
 }
 
 interface UserProfile {
+    name?: string;
     mode?: 'text' | 'audio';
     profession?: string;
     chantierType?: string;
     langue?: string;
     completed?: boolean;
+    userId?: string;
+    isNewUser?: boolean;
 }
 
-type ConversationState = 'welcome' | 'mode_selection' | 'profile_setup' | 'profile_question_1' | 'profile_question_2' | 'profile_question_3' | 'active' | 'incident';
+type ConversationState = 'welcome' | 'name_question' | 'mode_selection' | 'profile_setup' | 'profile_question_1' | 'profile_question_2' | 'profile_question_3' | 'active' | 'incident' | 'ending';
 
 interface ChatPanelProps {
     isOpen: boolean;
@@ -45,6 +49,14 @@ const ChatPanel = ({ isOpen, onClose, theme }: ChatPanelProps) => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
+    // Envoyer le message de fin quand le chat se ferme (si conversation active)
+    useEffect(() => {
+        if (!isOpen && conversationState === 'active' && userProfile.name) {
+            // Le chat se ferme, mais on ne peut pas envoyer de message ici
+            // Le message sera envoyé lors de la prochaine ouverture ou via handleResetChat
+        }
+    }, [isOpen, conversationState, userProfile.name]);
+
     // Message d'accueil automatique au premier chargement
     useEffect(() => {
         if (isOpen && !hasShownWelcome.current && messages.length === 0) {
@@ -54,6 +66,66 @@ const ChatPanel = ({ isOpen, onClose, theme }: ChatPanelProps) => {
             }, 500);
         }
     }, [isOpen]);
+
+    // Fonction pour vérifier les rappels en attente
+    const checkPendingReminders = async () => {
+        if (!userProfile.name) return;
+        
+        try {
+            let QURAN_API_URL = import.meta.env.VITE_QURAN_API_URL;
+            if (!QURAN_API_URL) {
+                const hostname = window.location.hostname;
+                QURAN_API_URL = `http://${hostname}:3001`;
+            }
+            
+            const response = await axios.get(`${QURAN_API_URL}/reminders/user/${encodeURIComponent(userProfile.name)}`);
+            
+            if (response.data.success && response.data.data.length > 0) {
+                // Afficher le premier rappel en attente
+                const reminder = response.data.data[0];
+                
+                const reminderMsg: ChatMessage = {
+                    id: 'reminder-' + reminder._id,
+                    text_bot: reminder.message,
+                    type: 'reminder',
+                    imageUrl: reminder.imageUrl,
+                    timestamp: new Date(reminder.createdAt)
+                };
+                
+                setMessages(prev => {
+                    // Vérifier si ce rappel n'a pas déjà été affiché
+                    const alreadyShown = prev.some(msg => msg.id === reminderMsg.id);
+                    if (alreadyShown) return prev;
+                    return [...prev, reminderMsg];
+                });
+                
+                // Marquer le rappel comme envoyé
+                try {
+                    await axios.post(`${QURAN_API_URL}/reminders/${reminder._id}/mark-sent`);
+                } catch (error) {
+                    console.error('Erreur marquage rappel:', error);
+                }
+            }
+        } catch (error) {
+            console.error('Erreur vérification rappels:', error);
+        }
+    };
+
+    // Vérifier les rappels en attente pour l'utilisateur
+    useEffect(() => {
+        if (conversationState === 'active' && userProfile.name) {
+            // Vérifier immédiatement
+            checkPendingReminders();
+            
+            // Vérifier toutes les 30 secondes pour de nouveaux rappels
+            const reminderInterval = setInterval(() => {
+                checkPendingReminders();
+            }, 30000); // Toutes les 30 secondes
+            
+            return () => clearInterval(reminderInterval);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [conversationState, userProfile.name]);
 
     // Routine quotidienne - alerte du matin
     useEffect(() => {
@@ -76,16 +148,12 @@ const ChatPanel = ({ isOpen, onClose, theme }: ChatPanelProps) => {
     const showWelcomeMessage = () => {
         const welcomeMsg: ChatMessage = {
             id: 'welcome-' + Date.now(),
-            text_bot: 'Salut 👋 Je suis Shora, ton compagnon sécurité sur le chantier. Tu veux qu\'on parle en texte ou en audio ?',
-            type: 'button',
-            buttons: [
-                { label: 'Texte', value: 'text', emoji: '🔤' },
-                { label: 'Audio', value: 'audio', emoji: '🎧' }
-            ],
+            text_bot: 'Salut 👋 Je suis Shora, ton compagnon sécurité sur le chantier.\n\nPour commencer, quel est ton nom ?',
+            type: 'text',
             timestamp: new Date()
         };
         setMessages([welcomeMsg]);
-        setConversationState('mode_selection');
+        setConversationState('name_question');
     };
 
     const showDailyTip = () => {
@@ -182,11 +250,70 @@ const ChatPanel = ({ isOpen, onClose, theme }: ChatPanelProps) => {
         };
 
         setMessages(prev => [...prev, userMessage]);
-        const currentInput = input.trim().toLowerCase();
+        const currentInput = input.trim();
+        const currentInputLower = currentInput.toLowerCase();
         setInput('');
 
+        // Gestion du nom (première question)
+        if (conversationState === 'name_question') {
+            const userName = currentInput.trim();
+            setUserProfile(prev => ({ ...prev, name: userName }));
+            
+            // Enregistrer ou mettre à jour l'utilisateur dans la base
+            try {
+                let QURAN_API_URL = import.meta.env.VITE_QURAN_API_URL;
+                if (!QURAN_API_URL) {
+                    const hostname = window.location.hostname;
+                    QURAN_API_URL = `http://${hostname}:3001`;
+                }
+                
+                const userResponse = await axios.post(`${QURAN_API_URL}/chatbot-users/create-or-update`, {
+                    name: userName
+                });
+                
+                if (userResponse.data.success) {
+                    setUserProfile(prev => ({ 
+                        ...prev, 
+                        userId: userResponse.data.data._id,
+                        isNewUser: userResponse.data.isNewUser
+                    }));
+                    
+                    const greetingMsg: ChatMessage = {
+                        id: 'greeting-' + Date.now(),
+                        text_bot: userResponse.data.isNewUser 
+                            ? `Enchanté ${userName} ! 👋 Bienvenue sur SHORA.\n\nTu veux qu'on parle en texte ou en audio ?`
+                            : `Bon retour ${userName} ! 👋\n\nTu veux qu'on parle en texte ou en audio ?`,
+                        type: 'button',
+                        buttons: [
+                            { label: 'Texte', value: 'text', emoji: '🔤' },
+                            { label: 'Audio', value: 'audio', emoji: '🎧' }
+                        ],
+                        timestamp: new Date()
+                    };
+                    setMessages(prev => [...prev, greetingMsg]);
+                    setConversationState('mode_selection');
+                }
+            } catch (error) {
+                console.error('Erreur enregistrement utilisateur:', error);
+                // Continuer même si l'enregistrement échoue
+                const greetingMsg: ChatMessage = {
+                    id: 'greeting-' + Date.now(),
+                    text_bot: `Enchanté ${userName} ! 👋\n\nTu veux qu'on parle en texte ou en audio ?`,
+                    type: 'button',
+                    buttons: [
+                        { label: 'Texte', value: 'text', emoji: '🔤' },
+                        { label: 'Audio', value: 'audio', emoji: '🎧' }
+                    ],
+                    timestamp: new Date()
+                };
+                setMessages(prev => [...prev, greetingMsg]);
+                setConversationState('mode_selection');
+            }
+            return;
+        }
+
         // Détection d'incident
-        if (currentInput.includes('danger') || currentInput.includes('incident') || currentInput.includes('accident')) {
+        if (currentInputLower.includes('danger') || currentInputLower.includes('incident') || currentInputLower.includes('accident')) {
             handleIncident(currentInput);
             return;
         }
@@ -225,6 +352,26 @@ const ChatPanel = ({ isOpen, onClose, theme }: ChatPanelProps) => {
 
         if (conversationState === 'profile_question_3') {
             setUserProfile(prev => ({ ...prev, langue: currentInput, completed: true }));
+            
+            // Mettre à jour l'utilisateur dans la base avec le profil complet
+            try {
+                let QURAN_API_URL = import.meta.env.VITE_QURAN_API_URL;
+                if (!QURAN_API_URL) {
+                    const hostname = window.location.hostname;
+                    QURAN_API_URL = `http://${hostname}:3001`;
+                }
+                
+                await axios.post(`${QURAN_API_URL}/chatbot-users/create-or-update`, {
+                    name: userProfile.name,
+                    profession: userProfile.profession,
+                    chantierType: userProfile.chantierType,
+                    langue: currentInput,
+                    mode: userProfile.mode
+                });
+            } catch (error) {
+                console.error('Erreur mise à jour profil:', error);
+            }
+            
             const completionMsg: ChatMessage = {
                 id: 'completion-' + Date.now(),
                 text_bot: `Excellent ! Profil créé. 🎉\n\nMétier: ${userProfile.profession}\nChantier: ${userProfile.chantierType}\nLangue: ${currentInput}\n\nJe suis maintenant prêt à t'aider avec la sécurité sur ton chantier !`,
@@ -281,6 +428,14 @@ const ChatPanel = ({ isOpen, onClose, theme }: ChatPanelProps) => {
                     showQuiz();
                 }, 1000);
             }
+
+            // Détecter la fin de conversation (au revoir, merci, etc.)
+            const endingKeywords = ['au revoir', 'aurevoir', 'merci', 'bye', 'à bientôt', 'a bientot', 'fin', 'terminé', 'terminer'];
+            if (endingKeywords.some(keyword => currentInputLower.includes(keyword))) {
+                setTimeout(() => {
+                    showEndingReminder();
+                }, 2000);
+            }
         } catch (error) {
             console.error('Erreur lors de l\'envoi du message :', error);
             setMessages(prev =>
@@ -303,14 +458,16 @@ const ChatPanel = ({ isOpen, onClose, theme }: ChatPanelProps) => {
         setMessages(prev => [...prev, incidentMsg]);
 
         try {
-            // Envoyer l'incident au backend principal
+            // Envoyer l'incident au backend principal avec les infos de l'utilisateur chatbot
             const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
             await axios.post(`${API_URL}/api/incidents`, {
                 description,
                 type: 'danger', // 'danger', 'accident', 'near-miss', 'equipment'
                 severity: 'high',
                 reportedBy: 'chatbot',
-                location: 'Chantier'
+                location: 'Chantier',
+                chatbotUserId: userProfile.userId || null,
+                chatbotUserName: userProfile.name || null
             }, {
                 headers: {
                     'Content-Type': 'application/json'
@@ -404,6 +561,17 @@ const ChatPanel = ({ isOpen, onClose, theme }: ChatPanelProps) => {
         }
     };
 
+    const showEndingReminder = () => {
+        const reminderMsg: ChatMessage = {
+            id: 'ending-reminder-' + Date.now(),
+            text_bot: `🛡️ **Rappel important avant de partir :**\n\n**Comment signaler un incident :**\n\n1️⃣ **Dans le chat** : Dis simplement "Danger" ou "Incident" et décris la situation\n2️⃣ **Appelle les secours** en cas d'urgence :\n   • 🚨 Pompiers : 19\n   • 🏥 SAMU : 15\n   • 🚔 Police : 17\n3️⃣ **Alerte ton superviseur** directement\n4️⃣ **Ne prends jamais de risques** inutiles\n\n💪 Reste vigilant et prends soin de toi !\n\nÀ bientôt ${userProfile.name || ''} ! 👋`,
+            type: 'text',
+            timestamp: new Date()
+        };
+        setMessages(prev => [...prev, reminderMsg]);
+        setConversationState('ending');
+    };
+
     const handleMicClick = () => {
         if (userProfile.mode === 'audio') {
             // TODO: Implémenter Web Speech API
@@ -414,15 +582,31 @@ const ChatPanel = ({ isOpen, onClose, theme }: ChatPanelProps) => {
     };
 
     const handleResetChat = () => {
-        setMessages([]);
-        setConversationState('welcome');
-        setUserProfile({});
-        setPoints(0);
-        hasShownWelcome.current = false;
-        hasShownDailyTip.current = false;
-        setTimeout(() => {
-            showWelcomeMessage();
-        }, 500);
+        // Afficher le rappel avant de réinitialiser si on est en conversation active
+        if (conversationState === 'active' && userProfile.name) {
+            showEndingReminder();
+            setTimeout(() => {
+                setMessages([]);
+                setConversationState('welcome');
+                setUserProfile({});
+                setPoints(0);
+                hasShownWelcome.current = false;
+                hasShownDailyTip.current = false;
+                setTimeout(() => {
+                    showWelcomeMessage();
+                }, 500);
+            }, 3000);
+        } else {
+            setMessages([]);
+            setConversationState('welcome');
+            setUserProfile({});
+            setPoints(0);
+            hasShownWelcome.current = false;
+            hasShownDailyTip.current = false;
+            setTimeout(() => {
+                showWelcomeMessage();
+            }, 500);
+        }
     };
 
     return (
@@ -602,8 +786,32 @@ const ChatPanel = ({ isOpen, onClose, theme }: ChatPanelProps) => {
                                                 </span>
                                             </div>
                                         ) : (
-                                            <div className="text-sm font-medium leading-relaxed whitespace-pre-line">
-                                                {msg.text_bot}
+                                            <div className="space-y-2">
+                                                {/* Image du rappel si disponible */}
+                                                {msg.type === 'reminder' && msg.imageUrl && (
+                                                    <div className="w-full rounded-lg overflow-hidden mb-2">
+                                                        <img 
+                                                            src={msg.imageUrl} 
+                                                            alt="Rappel sécurité" 
+                                                            className="w-full h-48 object-cover"
+                                                            onError={(e) => {
+                                                                // Si l'image ne charge pas, cacher l'élément
+                                                                (e.target as HTMLImageElement).style.display = 'none';
+                                                            }}
+                                                        />
+                                                    </div>
+                                                )}
+                                                <div className="text-sm font-medium leading-relaxed whitespace-pre-line">
+                                                    {msg.text_bot}
+                                                </div>
+                                                {/* Badge rappel */}
+                                                {msg.type === 'reminder' && (
+                                                    <div className="flex items-center gap-1 mt-2">
+                                                        <div className="px-2 py-1 bg-orange-500/20 border border-orange-500/50 rounded-lg">
+                                                            <span className="text-xs font-medium text-orange-600 dark:text-orange-400">📢 Rappel sécurité</span>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>
