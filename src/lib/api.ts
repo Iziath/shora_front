@@ -67,6 +67,8 @@ export const apiRequest = async <T = any>(
       // Intercepter l'erreur fetch avant qu'elle ne soit loggée par le navigateur
       const isConnectionError = fetchError.message?.includes('Failed to fetch') || 
                               fetchError.message?.includes('ERR_CONNECTION_REFUSED') ||
+                              fetchError.message?.includes('ERR_CONNECTION_CLOSED') ||
+                              fetchError.message?.includes('NetworkError') ||
                               fetchError.name === 'TypeError';
       
       if (isConnectionError) {
@@ -75,7 +77,7 @@ export const apiRequest = async <T = any>(
           ok: false,
           json: async () => ({ 
             success: false, 
-            error: 'Backend non disponible. Veuillez démarrer le serveur sur ' + API_URL 
+            error: 'Backend non disponible. Le serveur peut être en veille ou non démarré. URL: ' + API_URL 
           })
         } as Response;
       }
@@ -100,13 +102,15 @@ export const apiRequest = async <T = any>(
     // Ne pas logger ces erreurs dans la console car elles polluent quand le backend n'est pas démarré
     const isConnectionError = error.message?.includes('Failed to fetch') || 
                             error.message?.includes('ERR_CONNECTION_REFUSED') ||
+                            error.message?.includes('ERR_CONNECTION_CLOSED') ||
+                            error.message?.includes('NetworkError') ||
                             error.name === 'TypeError';
     
     if (isConnectionError) {
       // Retourner silencieusement l'erreur sans la logger
       return {
         success: false,
-        error: 'Backend non disponible. Veuillez démarrer le serveur sur ' + API_URL,
+        error: 'Backend non disponible. Le serveur peut être en veille ou non démarré. URL: ' + API_URL,
       };
     }
     
