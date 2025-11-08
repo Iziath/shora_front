@@ -139,6 +139,14 @@ export const login = async (email: string, password: string): Promise<ApiRespons
  * Vérifier le token
  */
 export const verifyToken = async (): Promise<ApiResponse<User>> => {
+  const token = getAuthToken();
+  // Ne pas faire d'appel si aucun token n'existe
+  if (!token) {
+    return {
+      success: false,
+      error: 'No token found',
+    };
+  }
   return apiRequest<User>('/api/auth/verify');
 };
 
