@@ -28,6 +28,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
   const checkAuth = async () => {
+    const token = localStorage.getItem('auth_token');
+    
+    // Si aucun token n'existe, ne pas faire d'appel API
+    if (!token) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await verifyToken();
       if (response.success && response.data) {
@@ -37,6 +46,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(null);
       }
     } catch (error) {
+      // Ne pas logger l'erreur si c'est juste une absence de token (route publique)
       removeAuthToken();
       setUser(null);
     } finally {
