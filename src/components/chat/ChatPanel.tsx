@@ -429,8 +429,17 @@ const ChatPanel = ({ isOpen, onClose, theme }: ChatPanelProps) => {
                 }, 1000);
             }
 
-            // Détecter la fin de conversation (au revoir, merci, etc.)
-            const endingKeywords = ['au revoir', 'aurevoir', 'merci', 'bye', 'à bientôt', 'a bientot', 'fin', 'terminé', 'terminer'];
+            // Détecter les phrases affirmatives (fin de conversation)
+            const affirmativeKeywords = ['ok', 'd\'accord', 'daccord', 'compris', 'entendu', 'parfait', 'bien', 'c\'est bon', 'cest bon', 'très bien', 'tres bien', 'super', 'merci', 'merci beaucoup'];
+            if (affirmativeKeywords.some(keyword => currentInputLower === keyword || currentInputLower.includes(keyword))) {
+                // Attendre la réponse du bot, puis afficher le message de fin
+                setTimeout(() => {
+                    showEndingReminder();
+                }, 3000); // 3 secondes après la réponse du bot
+            }
+
+            // Détecter la fin de conversation explicite (au revoir, etc.)
+            const endingKeywords = ['au revoir', 'aurevoir', 'bye', 'à bientôt', 'a bientot', 'fin', 'terminé', 'terminer'];
             if (endingKeywords.some(keyword => currentInputLower.includes(keyword))) {
                 setTimeout(() => {
                     showEndingReminder();
